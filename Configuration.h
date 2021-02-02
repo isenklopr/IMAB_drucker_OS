@@ -118,17 +118,17 @@
 #define EXT0_JAM_PULLUP 0
 
 #define FEATURE_RETRACTION 1
-#define AUTORETRACT_ENABLED 0
+#define AUTORETRACT_ENABLED 1
 #define RETRACTION_LENGTH 3
 #define RETRACTION_LONG_LENGTH 13
 #define RETRACTION_SPEED 5
-#define RETRACTION_Z_LIFT 0
-#define RETRACTION_UNDO_EXTRA_LENGTH 0
-#define RETRACTION_UNDO_EXTRA_LONG_LENGTH 0
+#define RETRACTION_Z_LIFT 5
+#define RETRACTION_UNDO_EXTRA_LENGTH 5
+#define RETRACTION_UNDO_EXTRA_LONG_LENGTH 5
 #define RETRACTION_UNDO_SPEED 20
 #define FILAMENTCHANGE_X_POS 0
 #define FILAMENTCHANGE_Y_POS 0
-#define FILAMENTCHANGE_Z_ADD  2
+#define FILAMENTCHANGE_Z_ADD  5
 #define FILAMENTCHANGE_REHOME 0
 #define FILAMENTCHANGE_SHORTRETRACT 0
 #define FILAMENTCHANGE_LONGRETRACT 57
@@ -160,7 +160,7 @@
 #define HAVE_HEATED_BED 1
 #define HEATED_BED_MAX_TEMP 120
 #define SKIP_M190_IF_WITHIN 2
-#define HEATED_BED_SENSOR_TYPE 1
+#define HEATED_BED_SENSOR_TYPE 13
 #define HEATED_BED_SENSOR_PIN TEMP_1_PIN
 #define HEATED_BED_HEATER_PIN HEATER_1_PIN
 #define HEATED_BED_SET_INTERVAL 5000
@@ -430,7 +430,7 @@ WARNING: Servos can draw a considerable amount of current. Make sure your system
 #define Z_PROBE_FINISHED_SCRIPT ""
 #define Z_PROBE_REQUIRES_HEATING 0
 #define Z_PROBE_MIN_TEMPERATURE 150
-#define FEATURE_AUTOLEVEL 1
+#define FEATURE_AUTOLEVEL 0
 #define Z_PROBE_X1 20
 #define Z_PROBE_Y1 20
 #define Z_PROBE_X2 160
@@ -456,7 +456,7 @@ WARNING: Servos can draw a considerable amount of current. Make sure your system
 #define AXISCOMP_TANXZ 0
 
 #ifndef SDSUPPORT  // Some boards have sd support on board. These define the values already in pins.h
-#define SDSUPPORT 0
+#define SDSUPPORT 1
 #undef SDCARDDETECT
 #define SDCARDDETECT 1
 #define SDCARDDETECTINVERTED 0
@@ -469,17 +469,17 @@ WARNING: Servos can draw a considerable amount of current. Make sure your system
 #define FEATURE_CHECKSUM_FORCED 0
 #define FEATURE_FAN_CONTROL 0
 #define FEATURE_FAN2_CONTROL 0
-#define FEATURE_CONTROLLER 0
+#define FEATURE_CONTROLLER 11
 #define ADC_KEYPAD_PIN -1
 #define LANGUAGE_EN_ACTIVE 1
-#define LANGUAGE_DE_ACTIVE 1
+#define LANGUAGE_DE_ACTIVE 0
 #define LANGUAGE_NL_ACTIVE 0
 #define LANGUAGE_PT_ACTIVE 0
-#define LANGUAGE_IT_ACTIVE 1
-#define LANGUAGE_ES_ACTIVE 1
-#define LANGUAGE_FI_ACTIVE 1
+#define LANGUAGE_IT_ACTIVE 0
+#define LANGUAGE_ES_ACTIVE 0
+#define LANGUAGE_FI_ACTIVE 0
 #define LANGUAGE_SE_ACTIVE 0
-#define LANGUAGE_FR_ACTIVE 1
+#define LANGUAGE_FR_ACTIVE 0
 #define LANGUAGE_CZ_ACTIVE 0
 #define LANGUAGE_PL_ACTIVE 0
 #define LANGUAGE_TR_ACTIVE 1
@@ -524,15 +524,7 @@ Values must be in range 1..255
 
 #define NUM_MOTOR_DRIVERS 0
 
-#undef max_software_endstop_r
-#undef min_software_endstop_x 
-#undef min_software_endstop_y 
-#undef min_software_endstop_z 
 
-#define max_software_endstop_r false
-#define min_software_endstop_x true  //false
-#define min_software_endstop_y true  //false
-#define min_software_endstop_z true
 
 #endif
 
@@ -607,7 +599,8 @@ Values must be in range 1..255
                 "step": "ORIG_E0_STEP_PIN",
                 "dir": "ORIG_E0_DIR_PIN",
                 "enable": "ORIG_E0_ENABLE_PIN"
-            }
+            },
+            "preheat": 190
         }
     ],
     "uiLanguage": 0,
@@ -749,7 +742,7 @@ Values must be in range 1..255
     "enableZProbing": "0",
     "extrudeMaxLength": 100,
     "homeOrder": "HOME_ORDER_XYZ",
-    "featureController": 0,
+    "featureController": 11,
     "uiPrinterName": "X400\/CE\/Pro",
     "uiPrinterCompany": "German RepRap GmbH",
     "uiPagesDuration": 4000,
@@ -777,7 +770,7 @@ Values must be in range 1..255
     "uiSpeeddependentPositioning": "0",
     "maxBedTemperature": 120,
     "bedSensorType": 13,
-    "bedSensorPin": "TEMP_2_PIN",
+    "bedSensorPin": "TEMP_1_PIN",
     "bedHeaterPin": "HEATER_1_PIN",
     "bedHeatManager": 0,
     "bedUpdateInterval": 5000,
@@ -866,7 +859,7 @@ Values must be in range 1..255
     "zProbeHeight": 40,
     "zProbeStartScript": "",
     "zProbeFinishedScript": "",
-    "featureAutolevel": "1",
+    "featureAutolevel": "0",
     "zProbeX1": 20,
     "zProbeY1": 20,
     "zProbeX2": 160,
@@ -875,7 +868,7 @@ Values must be in range 1..255
     "zProbeY3": 160,
     "zProbeSwitchingDistance": 1,
     "zProbeRepetitions": 1,
-    "sdSupport": "0",
+    "sdSupport": "1",
     "sdCardDetectPin": 1,
     "sdCardDetectInverted": "0",
     "uiStartScreenDelay": 5000,
@@ -924,17 +917,17 @@ Values must be in range 1..255
     "sdRunOnStop": "",
     "sdStopHeaterMotorsOnStop": "1",
     "featureRetraction": "1",
-    "autoretractEnabled": "0",
+    "autoretractEnabled": "1",
     "retractionLength": 3,
     "retractionLongLength": 13,
     "retractionSpeed": 5,
-    "retractionZLift": 0,
-    "retractionUndoExtraLength": 0,
-    "retractionUndoExtraLongLength": 0,
+    "retractionZLift": 5,
+    "retractionUndoExtraLength": 5,
+    "retractionUndoExtraLongLength": 5,
     "retractionUndoSpeed": 20,
     "filamentChangeXPos": 0,
     "filamentChangeYPos": 0,
-    "filamentChangeZAdd": 2,
+    "filamentChangeZAdd": 5,
     "filamentChangeRehome": 0,
     "filamentChangeShortRetract": 0,
     "filamentChangeLongRetract": 57,
@@ -964,7 +957,12 @@ Values must be in range 1..255
             "speed": 10,
             "dirPin": -1,
             "stepPin": -1,
-            "enablePin": -1
+            "enablePin": -1,
+            "endstopPin": -1,
+            "invertEndstop": "0",
+            "minEndstop": "1",
+            "endstopPullup": "1",
+            "maxDistance": 20
         },
         {
             "t": "None",
@@ -975,7 +973,12 @@ Values must be in range 1..255
             "speed": 10,
             "dirPin": -1,
             "stepPin": -1,
-            "enablePin": -1
+            "enablePin": -1,
+            "endstopPin": -1,
+            "invertEndstop": "0",
+            "minEndstop": "1",
+            "endstopPullup": "1",
+            "maxDistance": 20
         },
         {
             "t": "None",
@@ -986,7 +989,12 @@ Values must be in range 1..255
             "speed": 10,
             "dirPin": -1,
             "stepPin": -1,
-            "enablePin": -1
+            "enablePin": -1,
+            "endstopPin": -1,
+            "invertEndstop": "0",
+            "minEndstop": "1",
+            "endstopPullup": "1",
+            "maxDistance": 20
         },
         {
             "t": "None",
@@ -997,7 +1005,12 @@ Values must be in range 1..255
             "speed": 10,
             "dirPin": -1,
             "stepPin": -1,
-            "enablePin": -1
+            "enablePin": -1,
+            "endstopPin": -1,
+            "invertEndstop": "0",
+            "minEndstop": "1",
+            "endstopPullup": "1",
+            "maxDistance": 20
         },
         {
             "t": "None",
@@ -1008,7 +1021,12 @@ Values must be in range 1..255
             "speed": 10,
             "dirPin": -1,
             "stepPin": -1,
-            "enablePin": -1
+            "enablePin": -1,
+            "endstopPin": -1,
+            "invertEndstop": "0",
+            "minEndstop": "1",
+            "endstopPullup": "1",
+            "maxDistance": 20
         },
         {
             "t": "None",
@@ -1019,10 +1037,15 @@ Values must be in range 1..255
             "speed": 10,
             "dirPin": -1,
             "stepPin": -1,
-            "enablePin": -1
+            "enablePin": -1,
+            "endstopPin": -1,
+            "invertEndstop": "0",
+            "minEndstop": "1",
+            "endstopPullup": "1",
+            "maxDistance": 20
         }
     ],
-    "manualConfig": "#undef max_software_endstop_r\n#undef min_software_endstop_x \n#undef min_software_endstop_y \n#undef min_software_endstop_z \n\n#define max_software_endstop_r false\n#define min_software_endstop_x true  \/\/false\n#define min_software_endstop_y true  \/\/false\n#define min_software_endstop_z true",
+    "manualConfig": "",
     "zHomeMinTemperature": 0,
     "zHomeXPos": 999999,
     "zHomeYPos": 999999,
@@ -1032,14 +1055,14 @@ Values must be in range 1..255
     "zProbeZOffset": 0,
     "uiBedCoating": "0",
     "langEN": "1",
-    "langDE": "1",
+    "langDE": "0",
     "langNL": "0",
     "langPT": "0",
-    "langIT": "1",
-    "langES": "1",
-    "langFI": "1",
+    "langIT": "0",
+    "langES": "0",
+    "langFI": "0",
     "langSE": "0",
-    "langFR": "1",
+    "langFR": "0",
     "langCZ": "0",
     "langPL": "0",
     "langTR": "1",
@@ -1079,6 +1102,93 @@ Values must be in range 1..255
     "extruderSwitchXYSpeed": 100,
     "dualXAxis": "0",
     "boardFanSpeed": 255,
+    "x2Invert": 0,
+    "y2Invert": 0,
+    "z2Invert": 0,
+    "z3Invert": 0,
+    "z4Invert": 0,
+    "x2MinEndstop": 0,
+    "y2MinEndstop": 0,
+    "x2MaxEndstop": 0,
+    "y2MaxEndstop": 0,
+    "mirrorZ4": "0",
+    "mirrorZ4Motor": {
+        "name": "Extruder 3",
+        "step": "ORIG_E3_STEP_PIN",
+        "dir": "ORIG_E3_DIR_PIN",
+        "enable": "ORIG_E3_ENABLE_PIN"
+    },
+    "uiHeadline": "",
+    "bedPreheat": 70,
+    "zProbeDisableHeaters": "0",
+    "zProbeMedian": "0",
+    "zProbeEveryPoint": "",
+    "x2MinPin": -1,
+    "y2MinPin": -1,
+    "x2MaxPin": -1,
+    "y2MaxPin": -1,
+    "jamMethod": 1,
+    "zProbeDelay": 0,
+    "laserWarmupTime": 0,
+    "laserPwmMax": 255,
+    "laserWatt": 2,
+    "cncPwmMax": 255,
+    "cncRpmMax": 8000,
+    "cncSafeZ": 150,
+    "keepAliveInterval": 2000,
+    "moveXWhenHomed": "0",
+    "moveYWhenHomed": "0",
+    "moveZWhenHomed": "0",
+    "preheatTime": 30000,
+    "multiZEndstopHoming": "0",
+    "z2MinMaxPin": -1,
+    "z2MinMaxEndstop": 0,
+    "extruderIsZProbe": "0",
+    "boardFanMinSpeed": 0,
+    "doorPin": -1,
+    "doorEndstop": 1,
+    "zhomePreRaise": 0,
+    "zhomePreRaiseDistance": 10,
+    "dualXResolution": "0",
+    "x2axisStepsPerMM": 100,
+    "coolerPWMSpeed": 0,
+    "maxFanPWM": 255,
+    "raiseZOnToolchange": 0,
+    "distortionLimitTo": 2,
+    "automaticPowerup": 0,
+    "hasTMC2130": "0",
+    "TMC2130Sensorless": "0",
+    "TMC2130Steathchop": "1",
+    "TMC2130Interpolate256": "1",
+    "TMC2130StallguardSensitivity": 0,
+    "TMC2130PWMAmpl": 255,
+    "TMC2130PWMGrad": 1,
+    "TMC2130PWMAutoscale": "1",
+    "TMC2130PWMFreq": 2,
+    "TMC2130CSX": -1,
+    "TMC2130CSY": -1,
+    "TMC2130CSZ": -1,
+    "TMC2130CSE0": -1,
+    "TMC2130CSE1": -1,
+    "TMC2130CSE2": -1,
+    "TMC2130CurrentX": 1000,
+    "TMC2130CurrentY": 1000,
+    "TMC2130CurrentZ": 1000,
+    "TMC2130CurrentE0": 1000,
+    "TMC2130CurrentE1": 1000,
+    "TMC2130CurrentE2": 1000,
+    "TMC2130CoolstepTresholdX": 300,
+    "TMC2130CoolstepTresholdY": 300,
+    "TMC2130CoolstepTresholdZ": 300,
+    "microstepX": 16,
+    "microstepY": 16,
+    "microstepZ": 16,
+    "microstepE0": 16,
+    "microstepE1": 16,
+    "microstepE2": 16,
+    "parkPosX": 0,
+    "parkPosY": 0,
+    "parkPosZ": 10,
     "hasMAX6675": false,
     "hasMAX31855": false,
     "hasGeneric1": false,
