@@ -144,11 +144,11 @@ char displayCache[UI_ROWS][MAX_COLS+1];
 // .***. 14
 // *.*.* 21
 // ..*.. 4
+// ..*.. 4
+// ..*.. 4
 // ***.. 28
 // ..... 0
-// ..... 0
-// ..... 0
-const uint8_t character_back[8] PROGMEM = {4,14,21,4,28,0,0,0};
+const uint8_t character_back[8] PROGMEM = {4, 14, 21, 4, 4, 4, 28, 0};
 // Degrees sign - code 2
 // ..*.. 4
 // .*.*. 10
@@ -781,6 +781,9 @@ void initializeLCD()
 #ifdef U8GLIB_SSD1306_SW_SPI
     u8g_InitSPI(&u8g,&u8g_dev_ssd1306_128x64_sw_spi,  UI_DISPLAY_D4_PIN, UI_DISPLAY_ENABLE_PIN, UI_DISPLAY_RS_PIN, U8G_PIN_NONE, U8G_PIN_NONE);
 #endif
+#ifdef U8GLIB_SH1106_SW_SPI
+	u8g_InitSPI(&u8g,&u8g_dev_sh1106_128x64_sw_spi,  UI_DISPLAY_D4_PIN, UI_DISPLAY_ENABLE_PIN, UI_DISPLAY_RS_PIN, U8G_PIN_NONE, U8G_PIN_NONE);
+#endif
 #ifdef U8GLIB_KS0108_FAST
     u8g_Init8Bit(&u8g,&u8g_dev_ks0108_128x64_fast,UI_DISPLAY_D0_PIN,UI_DISPLAY_D1_PIN,UI_DISPLAY_D2_PIN,UI_DISPLAY_D3_PIN,UI_DISPLAY_D4_PIN,UI_DISPLAY_D5_PIN,UI_DISPLAY_D6_PIN,UI_DISPLAY_D7_PIN,UI_DISPLAY_ENABLE_PIN,UI_DISPLAY_CS1,UI_DISPLAY_CS2,
                  UI_DISPLAY_DI,UI_DISPLAY_RW_PIN,UI_DISPLAY_RESET_PIN);
@@ -1258,17 +1261,24 @@ void UIDisplay::parse(const char *txt,bool ram)
 	            break;
             }
 			break;
-        case 'd':
-            if(c2 == 'o') addStringOnOff(Printer::debugEcho());
-            else if(c2 == 'i') addStringOnOff(Printer::debugInfo());
-            else if(c2 == 'e') addStringOnOff(Printer::debugErrors());
-            else if(c2 == 'd') addStringOnOff(Printer::debugDryrun());
-            break;
+        case 'd':  // debug boolean
+            if (c2 == 'o') addStringOnOff(Printer::debugEcho());
+            if (c2 == 'i') addStringOnOff(Printer::debugInfo());
+            if (c2 == 'e') addStringOnOff(Printer::debugErrors());
+            if (c2 == 'd') addStringOnOff(Printer::debugDryrun());
+            if (c2 == 'p') addStringOnOff(Printer::debugEndStop());
+            if (c2 == 'x') addStringP(Endstops::xMin() ? ui_selected : ui_unselected);
+            if (c2 == 'X') addStringP(Endstops::xMax() ? ui_selected : ui_unselected);
+            if (c2 == 'y') addStringP(Endstops::yMin() ? ui_selected : ui_unselected);
+            if (c2 == 'Y') addStringP(Endstops::yMax() ? ui_selected : ui_unselected);
+            if (c2 == 'z') addStringP(Endstops::zMin() ? ui_selected : ui_unselected);
+            if (c2 == 'Z') addStringP(Endstops::zMax() ? ui_selected : ui_unselected);
+        break;
         case 'D':
 #if FEATURE_DITTO_PRINTING
             if(c2>='0' && c2<='9')
             {
-                addStringP(Extruder::dittoMode==c2-'0'?ui_selected:ui_unselected);
+                addStringP(Extruder::dittoMode==c2-'0' ? ui_selected : ui_unselected);
             }
 #endif
             break;
@@ -1294,10 +1304,10 @@ void UIDisplay::parse(const char *txt,bool ram)
                 break;
             }
 #endif
+#if NUM_TEMPERATURE_LOOPS > 0
             uint8_t eid = NUM_EXTRUDER;    // default = BED if c2 not specified extruder number
             if(c2 == 'c') eid = Extruder::current->id;
             else if(c2 >= '0' && c2 <= '9') eid = c2 - '0';
-#if NUM_TEMPERATURE_LOOPS > 0
             if(Printer::isAnyTempsensorDefect())
             {
                 if(eid == 0 && ++beepdelay > 30) beepdelay = 0; // beep every 30 seconds
@@ -1646,7 +1656,7 @@ void UIDisplay::parse(const char *txt,bool ram)
             break;
         case 'y':
 #if DRIVE_SYSTEM == DELTA
-            if(c2 >= '0' && c2 <= '3') fvalue = (float)Printer::currentDeltaPositionSteps[c2 - '0']*Printer::invAxisStepsPerMM[c2-'0'];
+            if(c2 >= '0' && c2 <= '3') fvalue = (float)Printer::currentNonlinearPositionSteps[c2 - '0']*Printer::invAxisStepsPerMM[c2-'0'];
             addFloat(fvalue,3,2);
 #endif
             break;
@@ -1824,6 +1834,7 @@ void sdrefresh(uint16_t &r,char cache[UI_ROWS][MAX_COLS+1])
 // Refresh current menu page
 void UIDisplay::refreshPage()
 {
+   Endstops::update();
 #if  UI_DISPLAY_TYPE == DISPLAY_GAMEDUINO2
     GD2::refresh();
 #else
@@ -1837,8 +1848,8 @@ void UIDisplay::refreshPage()
         ui_autoreturn_time = HAL::timeInMilliseconds() + UI_AUTORETURN_TO_MENU_AFTER;
 #endif
     encoderStartScreen = uid.encoderLast;
-
     // Copy result into cache
+    Endstops::update();
     if(menuLevel == 0) // Top level menu
     {
         UIMenu *men = (UIMenu*)pgm_read_word(&(ui_pages[menuPos[0]]));
@@ -3064,6 +3075,9 @@ int UIDisplay::executeAction(unsigned int action, bool allowMoves)
         case UI_ACTION_DEBUG_ERROR:
             Printer::toggleErrors();
             break;
+        case UI_ACTION_DEBUG_ENDSTOP:
+            Printer::toggleEndStop();
+            break;
         case UI_ACTION_DEBUG_DRYRUN:
             Printer::toggleDryRun();
             if(Printer::debugDryrun())   // simulate movements without printing
@@ -3460,7 +3474,7 @@ int UIDisplay::executeAction(unsigned int action, bool allowMoves)
             Printer::currentPositionSteps[Z_AXIS] = 0;
             Printer::updateDerivedParameter();
 #if NONLINEAR_SYSTEM
-            transformCartesianStepsToDeltaSteps(Printer::currentPositionSteps, Printer::currentDeltaPositionSteps);
+            transformCartesianStepsToDeltaSteps(Printer::currentPositionSteps, Printer::currentNonlinearPositionSteps);
 #endif
             Printer::updateCurrentPosition(true);
             Com::printFLN(Com::tZProbePrinterHeight, Printer::zLength);
