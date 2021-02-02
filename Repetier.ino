@@ -1,4 +1,4 @@
-                        /*
+/*
     This file is part of Repetier-Firmware.
 
     Repetier-Firmware is free software: you can redistribute it and/or modify
@@ -111,18 +111,18 @@ Custom M Codes
 - M209 S<0/1> - Enable/disable autoretraction
 - M220 S<Feedrate multiplier in percent> - Increase/decrease given feedrate
 - M221 S<Extrusion flow multiplier in percent> - Increase/decrease given flow rate
-- M228 P<pin> S<state 0/1> - Wait for pin getting state S. Add X0 to init as input without pullup and X1 for input with pullup.
+- M226 P<pin> S<state 0/1> - Wait for pin getting state S. Add X0 to init as input without pullup and X1 for input with pullup.
 - M231 S<OPS_MODE> X<Min_Distance> Y<Retract> Z<Backlash> F<ReatrctMove> - Set OPS parameter
 - M232 - Read and reset max. advance values
 - M233 X<AdvanceK> Y<AdvanceL> - Set temporary advance K-value to X and linear term advanceL to Y
 - M251 Measure Z steps from homing stop (Delta printers). S0 - Reset, S1 - Print, S2 - Store to Z length (also EEPROM if enabled)
 - M280 S<mode> - Set ditto printing mode. mode: 0 = off, 1 = 1 extra extruder, 2 = 2 extra extruder, 3 = 3 extra extruders
-- M281 Test if watchdog is running and working.
+- M281 Test if watchdog is running and working. Use M281 X0 to disable watchdog on AVR boards. Sometimes needed for boards with old bootloaders to allow reflashing.
 - M300 S<Frequency> P<DurationMillis> play frequency
 - M302 S<0 or 1> - allow cold extrusion. Without S parameter it will allow. S1 will disallow.
 - M303 P<extruder/bed> S<printTemerature> X0 R<Repetitions>- Autodetect pid values. Use P<NUM_EXTRUDER> for heated bed. X0 saves result in EEPROM. R is number of cycles.
-- M320 - Activate autolevel
-- M321 - Deactivate autolevel
+- M320 S<0/1> - Activate autolevel, S1 stores it in eeprom
+- M321 S<0/1> - Deactivate autolevel, S1 stores it in eeprom
 - M322 - Reset autolevel matrix
 - M323 S0/S1 enable disable distortion correction P0 = not permanent, P1 = permanent = default
 - M340 P<servoId> S<pulseInUS> R<autoOffIn ms>: servoID = 0..3, Servos are controlled by a pulse with normally between 500 and 2500 with 1500ms in center position. 0 turns servo off. R allows automatic disabling after a while.
@@ -145,6 +145,7 @@ Custom M Codes
 - M601 S<1/0> - Pause extruders. Paused extrudes disable heaters and motor. Unpausing reheats extruder to old temp.
 - M602 S<1/0> P<1/0>- Debug jam control (S) Disable jam control (P). If enabled it will log signal changes and will not trigger jam errors!
 - M908 P<address> S<value> : Set stepper current for digipot (RAMBO board)
+- M999 - Continue from fatal error. M999 S1 will create a fatal error for testing.
 */
 
 #include "Repetier.h"
