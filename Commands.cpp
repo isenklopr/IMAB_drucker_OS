@@ -71,7 +71,7 @@ void Commands::checkForPeriodicalActions(bool allowNewMoves) {
         EVENT_TIMER_500MS;
     }
     // If called from queueDelta etc. it is an error to start a new move since it
-    // would invalidate old computation resulting in unpredicted behavior.
+    // would invalidate old computation resulting in unpredicted behaviour.
     // lcd controller can start new moves, so we disallow it if called from within
     // a move command.
     UI_SLOW(allowNewMoves);
@@ -871,7 +871,7 @@ void Commands::processGCode(GCode *com) {
                 if(com->hasS()) Printer::setNoDestinationCheck(com->S != 0);
                 if(Printer::setDestinationStepsFromGCode(com)) // For X Y Z E F
 #if NONLINEAR_SYSTEM
-                    if (!PrintLine::queueNonlinearMove(ALWAYS_CHECK_ENDSTOPS, true, true)) {
+                    if (!PrintLine::queueDeltaMove(ALWAYS_CHECK_ENDSTOPS, true, true)) {
                         Com::printWarningFLN(PSTR("executeGCode / queueDeltaMove returns error"));
                     }
 #else
@@ -955,18 +955,11 @@ void Commands::processGCode(GCode *com) {
             Printer::unitIsInches = 0;
             break;
         case 28: { //G28 Home all Axis one at a time
-#if defined(SUPPORT_LASER) && SUPPORT_LASER
-				bool oldLaser = LaserDriver::laserOn;
-			    LaserDriver::laserOn = false;
-#endif				
                 uint8_t homeAllAxis = (com->hasNoXYZ() && !com->hasE());
                 if(com->hasE())
                     Printer::currentPositionSteps[E_AXIS] = 0;
                 if(homeAllAxis || !com->hasNoXYZ())
                     Printer::homeAxis(homeAllAxis || com->hasX(),homeAllAxis || com->hasY(),homeAllAxis || com->hasZ());
-#if defined(SUPPORT_LASER) && SUPPORT_LASER
-			    LaserDriver::laserOn = oldLaser;
-#endif
                 Printer::updateCurrentPosition();
             }
             break;
@@ -976,7 +969,7 @@ void Commands::processGCode(GCode *com) {
                 float actTemp[NUM_EXTRUDER];
                 for(int i = 0; i < NUM_EXTRUDER; i++)
                     actTemp[i] = extruder[i].tempControl.targetTemperatureC;
-	            Printer::moveToReal(IGNORE_COORDINATE,IGNORE_COORDINATE,RMath::max(EEPROM::zProbeHeight(),static_cast<float>(ZHOME_HEAT_HEIGHT)),IGNORE_COORDINATE,Printer::homingFeedrate[Z_AXIS]);
+	            Printer::moveToReal(IGNORE_COORDINATE,IGNORE_COORDINATE,RMath::max(EEPROM::zProbeHeight(),ZHOME_HEAT_HEIGHT),IGNORE_COORDINATE,Printer::homingFeedrate[Z_AXIS]);
                 Commands::waitUntilEndOfAllMoves();
 #if ZHOME_HEAT_ALL
                 for(int i = 0; i < NUM_EXTRUDER; i++) {
@@ -1089,7 +1082,7 @@ void Commands::processGCode(GCode *com) {
             float actTemp[NUM_EXTRUDER];
             for(int i = 0; i < NUM_EXTRUDER; i++)
                 actTemp[i] = extruder[i].tempControl.targetTemperatureC;
-            Printer::moveToReal(IGNORE_COORDINATE,IGNORE_COORDINATE,RMath::max(EEPROM::zProbeHeight(),static_cast<float>(ZHOME_HEAT_HEIGHT)),IGNORE_COORDINATE,Printer::homingFeedrate[Z_AXIS]);
+            Printer::moveToReal(IGNORE_COORDINATE,IGNORE_COORDINATE,RMath::max(EEPROM::zProbeHeight(),ZHOME_HEAT_HEIGHT),IGNORE_COORDINATE,Printer::homingFeedrate[Z_AXIS]);
             Commands::waitUntilEndOfAllMoves();
 #if ZHOME_HEAT_ALL
             for(int i = 0; i < NUM_EXTRUDER; i++) {
@@ -1142,7 +1135,7 @@ void Commands::processGCode(GCode *com) {
                     float actTemp[NUM_EXTRUDER];
                     for(int i = 0; i < NUM_EXTRUDER; i++)
                         actTemp[i] = extruder[i].tempControl.targetTemperatureC;
-		            Printer::moveToReal(IGNORE_COORDINATE,IGNORE_COORDINATE,RMath::max(EEPROM::zProbeHeight(),static_cast<float>(ZHOME_HEAT_HEIGHT)),IGNORE_COORDINATE,Printer::homingFeedrate[Z_AXIS]);
+		            Printer::moveToReal(IGNORE_COORDINATE,IGNORE_COORDINATE,RMath::max(EEPROM::zProbeHeight(),ZHOME_HEAT_HEIGHT),IGNORE_COORDINATE,Printer::homingFeedrate[Z_AXIS]);
                     Commands::waitUntilEndOfAllMoves();
 #if ZHOME_HEAT_ALL
                     for(int i = 0; i < NUM_EXTRUDER; i++) {
@@ -1232,7 +1225,7 @@ void Commands::processGCode(GCode *com) {
                                 // Use either A or B tower as they acnhor x cartesian axis and always have
                                 // Radius distance to center in simplest set up.
                                 float h = Printer::deltaDiagonalStepsSquaredB.f;
-                                unsigned long bSteps = Printer::currentNonlinearPositionSteps[B_TOWER];
+                                unsigned long bSteps = Printer::currentDeltaPositionSteps[B_TOWER];
                                 // The correct Rod Radius would put us here at z==0 and B height is
                                 // square root (rod length squared minus rod radius squared)
                                 // Reverse that to get calculated Rod Radius given B height
@@ -1245,7 +1238,7 @@ void Commands::processGCode(GCode *com) {
                                 // Use either A or B tower as they acnhor x cartesian axis and always have
                                 // Radius distance to center in simplest set up.
                                 unsigned long h = Printer::deltaDiagonalStepsSquaredB.l;
-                                unsigned long bSteps = Printer::currentNonlinearPositionSteps[B_TOWER];
+                                unsigned long bSteps = Printer::currentDeltaPositionSteps[B_TOWER];
                                 // The correct Rod Radius would put us here at z==0 and B height is
                                 // square root (rod length squared minus rod radius squared)
                                 // Reverse that to get calculated Rod Radius given B height
@@ -1333,9 +1326,9 @@ void Commands::processGCode(GCode *com) {
                 Printer::coordinateOffset[X_AXIS] = 0;
                 Printer::coordinateOffset[Y_AXIS] = 0;
                 Printer::coordinateOffset[Z_AXIS] = 0;
-                Printer::currentNonlinearPositionSteps[A_TOWER] = 0;
-                Printer::currentNonlinearPositionSteps[B_TOWER] = 0;
-                Printer::currentNonlinearPositionSteps[C_TOWER] = 0;
+                Printer::currentDeltaPositionSteps[A_TOWER] = 0;
+                Printer::currentDeltaPositionSteps[B_TOWER] = 0;
+                Printer::currentDeltaPositionSteps[C_TOWER] = 0;
                 // similar to comment above, this will get a different answer from any different starting point
                 // so it is unclear how this is helpful. It must start at a well defined point.
                 Printer::deltaMoveToTopEndstops(Printer::homingFeedrate[Z_AXIS]);
@@ -1351,9 +1344,9 @@ void Commands::processGCode(GCode *com) {
             }
             break;
         case 135: // G135
-            Com::printF(PSTR("CompDelta:"),Printer::currentNonlinearPositionSteps[A_TOWER]);
-            Com::printF(Com::tComma,Printer::currentNonlinearPositionSteps[B_TOWER]);
-            Com::printFLN(Com::tComma,Printer::currentNonlinearPositionSteps[C_TOWER]);
+            Com::printF(PSTR("CompDelta:"),Printer::currentDeltaPositionSteps[A_TOWER]);
+            Com::printF(Com::tComma,Printer::currentDeltaPositionSteps[B_TOWER]);
+            Com::printFLN(Com::tComma,Printer::currentDeltaPositionSteps[C_TOWER]);
 #ifdef DEBUG_REAL_POSITION
             Com::printF(PSTR("RealDelta:"),Printer::realDeltaPositionSteps[A_TOWER]);
             Com::printF(Com::tComma,Printer::realDeltaPositionSteps[B_TOWER]);
@@ -1731,6 +1724,56 @@ void Commands::processMCode(GCode *com) {
                 Extruder *actExtruder = Extruder::current;
                 if(com->hasT() && com->T < NUM_EXTRUDER) actExtruder = &extruder[com->T];
                 if (com->hasS()) Extruder::setTemperatureForExtruder(com->S, actExtruder->id, com->hasF() && com->F > 0, true);
+                /*        UI_STATUS_UPD(UI_TEXT_HEATING_EXTRUDER);
+                #if defined(SKIP_M109_IF_WITHIN) && SKIP_M109_IF_WITHIN > 0
+                if(abs(actExtruder->tempControl.currentTemperatureC - actExtruder->tempControl.targetTemperatureC) < (SKIP_M109_IF_WITHIN)) break; // Already in range
+                #endif
+                EVENT_WAITING_HEATER(actExtruder->id);
+                bool dirRising = actExtruder->tempControl.targetTemperature > actExtruder->tempControl.currentTemperature;
+                millis_t printedTime = HAL::timeInMilliseconds();
+                millis_t waituntil = 0;
+                #if RETRACT_DURING_HEATUP
+                uint8_t retracted = 0;
+                #endif
+                millis_t currentTime;
+                do
+                {
+                previousMillisCmd = currentTime = HAL::timeInMilliseconds();
+                if( (currentTime - printedTime) > 1000 )   //Print Temp Reading every 1 second while heating up.
+                {
+                printTemperatures();
+                printedTime = currentTime;
+                }
+                Commands::checkForPeriodicalActions(true);
+                //gcode_read_serial();
+                #if RETRACT_DURING_HEATUP
+                if (actExtruder == Extruder::current && actExtruder->waitRetractUnits > 0 && !retracted && dirRising && actExtruder->tempControl.currentTemperatureC > actExtruder->waitRetractTemperature)
+                {
+                PrintLine::moveRelativeDistanceInSteps(0, 0, 0, -actExtruder->waitRetractUnits * Printer::axisStepsPerMM[E_AXIS], actExtruder->maxFeedrate / 4, false, false);
+                retracted = 1;
+                }
+                #endif
+                if((waituntil == 0 &&
+                (dirRising ? actExtruder->tempControl.currentTemperatureC >= actExtruder->tempControl.targetTemperatureC - 1
+                : actExtruder->tempControl.currentTemperatureC <= actExtruder->tempControl.targetTemperatureC + 1))
+                #if defined(TEMP_HYSTERESIS) && TEMP_HYSTERESIS>=1
+                || (waituntil != 0 && (abs(actExtruder->tempControl.currentTemperatureC - actExtruder->tempControl.targetTemperatureC)) > TEMP_HYSTERESIS)
+                #endif
+                )
+                {
+                waituntil = currentTime + 1000UL*(millis_t)actExtruder->watchPeriod; // now wait for temp. to stabalize
+                }
+                }
+                while(waituntil == 0 || (waituntil != 0 && (millis_t)(waituntil - currentTime) < 2000000000UL));
+                #if RETRACT_DURING_HEATUP
+                if (retracted && actExtruder == Extruder::current)
+                {
+                PrintLine::moveRelativeDistanceInSteps(0, 0, 0, actExtruder->waitRetractUnits * Printer::axisStepsPerMM[E_AXIS], actExtruder->maxFeedrate / 4, false, false);
+                }
+                #endif
+                EVENT_HEATING_FINISHED(actExtruder->id);
+                }
+                UI_CLEAR_STATUS;*/
             }
 #endif
             previousMillisCmd = HAL::timeInMilliseconds();
@@ -1938,7 +1981,7 @@ void Commands::processMCode(GCode *com) {
         case 221: // M221 S<Extrusion flow multiplier in percent>
             changeFlowrateMultiply(com->getS(100));
             break;
-        case 226: // M226 P<pin> S<state 0/1> - Wait for pin getting state S
+        case 228: // M228 P<pin> S<state 0/1> - Wait for pin getting state S
             if(!com->hasS() || !com->hasP())
                 break;
             {
@@ -1994,7 +2037,7 @@ void Commands::processMCode(GCode *com) {
             Printer::currentPositionSteps[Z_AXIS] = 0;
             Printer::updateDerivedParameter();
 #if NONLINEAR_SYSTEM
-            transformCartesianStepsToDeltaSteps(Printer::currentPositionSteps, Printer::currentNonlinearPositionSteps);
+            transformCartesianStepsToDeltaSteps(Printer::currentPositionSteps, Printer::currentDeltaPositionSteps);
 #endif
             Printer::updateCurrentPosition();
             Com::printFLN(Com::tZProbePrinterHeight,Printer::zLength);
@@ -2007,32 +2050,14 @@ void Commands::processMCode(GCode *com) {
 #endif
 #if FEATURE_DITTO_PRINTING
         case 280: // M280
-#if DUAL_X_AXIS
-			Extruder::dittoMode = 0;
-			Extruder::selectExtruderById(0);
-			Printer::homeXAxis();
-			if(com->hasS() && com->S > 0) {
-				Extruder::current = &extruder[1];
-				PrintLine::moveRelativeDistanceInSteps(-Extruder::current->xOffset + static_cast<int32_t>(Printer::xLength*0.5*Printer::axisStepsPerMM[X_AXIS]), 0, 0, 0, EXTRUDER_SWITCH_XY_SPEED, true, true);
-				Printer::currentPositionSteps[X_AXIS] = Printer::xMinSteps;
-				Extruder::current = &extruder[0];
-				Extruder::dittoMode = 1;
-			}
-#else		
             if(com->hasS()) { // Set ditto mode S: 0 = off, 1 = 1 extra extruder, 2 = 2 extra extruder, 3 = 3 extra extruders
                 Extruder::dittoMode = com->S;
             }
-#endif			
             break;
 #endif
         case 281: // Trigger watchdog
 #if FEATURE_WATCHDOG
             {
-				if(com->hasX()) {
-					HAL::stopWatchdog();
-					Com::printFLN(PSTR("Watchdog disabled"));
-					break;
-				}
                 Com::printInfoFLN(PSTR("Triggering watchdog. If activated, the printer will reset."));
                 Printer::kill(false);
                 HAL::delayMilliseconds(200); // write output, make sure heaters are off for safety
@@ -2336,7 +2361,7 @@ void Commands::processMCode(GCode *com) {
 #endif
             break;
 #if 0 && UI_DISPLAY_TYPE != NO_DISPLAY
-        // some debugging commands normally disabled
+        // some debuggingcommands normally disabled
         case 888:
             Com::printFLN(PSTR("Selected language:"),(int)Com::selectedLanguage);
             Com::printF(PSTR("Translation:"));
@@ -2345,21 +2370,19 @@ void Commands::processMCode(GCode *com) {
         case 889:
             uid.showLanguageSelectionWizard();
             break;
+        case 890: {
+                if(com->hasX() && com->hasY()) {
+                    float c = Printer::bendingCorrectionAt(com->X,com->Y);
+                    Com::printF(PSTR("Bending at ("),com->X);
+                    Com::printF(PSTR(","),com->Y);
+                    Com::printFLN(PSTR(") = "),c);
+                }
+            }
+            break;
         case 891:
             if(com->hasS())
                 EEPROM::setVersion(com->S);
             break;
-#endif
-#if FEATURE_AUTOLEVEL && FEATURE_Z_PROBE
-		case 890: {
-			if(com->hasX() && com->hasY()) {
-				float c = Printer::bendingCorrectionAt(com->X,com->Y);
-				Com::printF(PSTR("Bending at ("),com->X);
-				Com::printF(PSTR(","),com->Y);
-				Com::printFLN(PSTR(") = "),c);
-			}
-		}
-break;
 #endif
 		case 999: // Stop fatal error take down
 			if(com->hasS())

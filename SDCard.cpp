@@ -78,11 +78,7 @@ void SDCard::initsd()
     if(READ(SDCARDDETECT) != SDCARDDETECTINVERTED)
         return;
 #endif
-	HAL::pingWatchdog();
 	HAL::delayMilliseconds(50); // wait for stabilization of contacts, bootup ...
-    fat.begin(SDSS, SPI_FULL_SPEED);  // dummy init of SD_CARD
-    HAL::delayMilliseconds(50);       // wait for init end
-	HAL::pingWatchdog();
     /*if(dir[0].isOpen())
         dir[0].close();*/
     if(!fat.begin(SDSS, SPI_FULL_SPEED))
@@ -93,7 +89,6 @@ void SDCard::initsd()
     }
     sdactive = true;
     Printer::setMenuMode(MENU_MODE_SD_MOUNTED, true);
-	HAL::pingWatchdog();
 
     fat.chdir();
     if(selectFile("init.g", true))
@@ -145,7 +140,8 @@ void SDCard::pausePrint(bool intern)
 #if DRIVE_SYSTEM == DELTA
         Printer::moveToReal(0, 0.9 * EEPROM::deltaMaxRadius(), IGNORE_COORDINATE, IGNORE_COORDINATE, Printer::maxFeedrate[X_AXIS]);
 #else
-        Printer::moveToReal(Printer::xMin, Printer::yMin + Printer::yLength, IGNORE_COORDINATE, IGNORE_COORDINATE, Printer::maxFeedrate[X_AXIS]);
+        Printer::moveToReal(Printer::xMin+Printer::xLength/2,Printer::yMin+Printer::yLength,Printer::lastCmdPos[Z_AXIS],IGNORE_COORDINATE,0.5*Printer::maxFeedrate[X_AXIS]);   // Pause fährt x Mitte, y max - 20mm 
+        //Printer::moveToReal(Printer::xMin, Printer::yMin, IGNORE_COORDINATE, IGNORE_COORDINATE, Printer::maxFeedrate[X_AXIS]/3);
 #endif
         Printer::lastCmdPos[X_AXIS] = Printer::currentPosition[X_AXIS];
         Printer::lastCmdPos[Y_AXIS] = Printer::currentPosition[Y_AXIS];
@@ -159,7 +155,7 @@ void SDCard::continuePrint(bool intern)
     if(!sd.sdactive) return;
     if(intern) {
         GCode::executeFString(PSTR(PAUSE_END_COMMANDS));
-        Printer::GoToMemoryPosition(true, true, false, false, Printer::maxFeedrate[X_AXIS]);
+        Printer::GoToMemoryPosition(true, true, false, false, Printer::maxFeedrate[X_AXIS]/3);
         Printer::GoToMemoryPosition(false, false, true, false, Printer::maxFeedrate[Z_AXIS] / 2.0f);
         Printer::GoToMemoryPosition(false, false, false, true, Printer::maxFeedrate[E_AXIS] / 2.0f);
     }
@@ -178,7 +174,7 @@ void SDCard::stopPrint()
     GCode::executeFString(PSTR(SD_RUN_ON_STOP));
     if(SD_STOP_HEATER_AND_MOTORS_ON_STOP) {
         Commands::waitUntilEndOfAllMoves();
-        Printer::kill(false);
+        Printer::kill(true);
     }
 }
 
